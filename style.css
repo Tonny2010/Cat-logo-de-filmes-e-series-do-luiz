@@ -10,7 +10,6 @@ header {
      font-size: 32px;
 }
 
-div {
-padding: 500px;
-
+section{
+    background: whitesmoke;
 }
