@@ -1,9 +1,10 @@
 body {
     color: darkred;
-    background: darkgreen;  
+    background: darkgreen;
     margin: 0px
 }
+
 header {
-border-bottom: solid 2px darkred;
-margin: 50px
+    border-bottom: solid 2px darkred;
+    margin: 50px
 }
