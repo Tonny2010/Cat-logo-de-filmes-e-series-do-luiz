@@ -1,10 +1,9 @@
-<style>
+
 @import url('https://fonts.googleapis.com/css2?family=Ponnala&display=swap');
-</style>
-h1 {
-    font-family: "Ponnala"; 
-}
-    
+
+
+
+
 
 }
 
@@ -14,6 +13,10 @@ body {
     margin: 5px
 }
 
+h1 {
+    font-family: "Ponnala"; 
+}
+    
 header {
     border-bottom: solid 2px darkred;
     padding: 20px 32px;
