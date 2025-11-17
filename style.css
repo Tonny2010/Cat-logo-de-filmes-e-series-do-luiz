@@ -1,24 +1,59 @@
-
-@import url("https://fonts.googleapis.com/css2?family=Ponnala&display=swap");
-}
+/* CSS básico pro jogo de Ping Pong */
 
 body {
-    color: black;
-    background: whitesmoke;
-    margin: 5px;
+  background: #111;
+  color: #fff;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
 }
 
 h1 {
-    font-family: "Ponnala"; 
+  font-weight: 700;
+  margin: 0;
+  text-align: center;
 }
 
-    
-header {
-    border-bottom: solid 2px darkred;
-    padding: 20px 32px;
-    font-size: 32px;
+#menu {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  background: #222;
+  padding: 10px 20px;
+  border-radius: 8px;
 }
 
-section {
-    background: gray;
+#menu label {
+  cursor: pointer;
+}
+
+#menu button {
+  background: #444;
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  cursor: pointer;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: 0.15s;
+}
+
+#menu button:hover {
+  background: #666;
+}
+
+#score {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+canvas {
+  background: #000;
+  border: 3px solid #fff;
+  outline: none;
+  border-radius: 10px;
 }

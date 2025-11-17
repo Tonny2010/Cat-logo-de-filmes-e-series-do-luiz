@@ -1,27 +1,251 @@
+<!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
-    <link rel="stylesheet" href="style.css" />
-    <title>9 MA</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ping Pong — index.html</title>
+  <!-- Sem estilos (você pediu). Vou incluir apenas a estrutura e o script do jogo. -->
 </head>
-
 <body>
-    <header>Conhecendo o mundo</header>
+  <h1>Ping Pong (HTML + JS)</h1>
 
-    <section>
-        <div>
-            <h1>Partiu a Italia</h1>
-            <p>#Italia</p>
-        </div>
+  <!-- Controles / UI simples (sem CSS) -->
+  <div id="menu">
+    <label>
+      <input type="radio" name="mode" value="single" checked /> Single player
+    </label>
+    <label>
+      <input type="radio" name="mode" value="two" /> Two player
+    </label>
+    <button id="startBtn">Start</button>
+    <button id="resetBtn">Reset</button>
+    <span id="score">0 : 0</span>
+  </div>
 
-        <div>
-            <iframe width="560" height="315" src="https://www.youtube.com/embed/UkZKnu4JErs?si=CfadWZIOOVWm72Zr"
-                title="YouTube video player" frameborder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-        </div>
-    </section>
+  <!-- Canvas do jogo -->
+  <canvas id="game" width="800" height="480" tabindex="0"></canvas>
 
+  <p>
+    Controles: Player 1 (esquerda) = W / S. Player 2 (direita) = setas cima/baixo.
+    No modo Single player, a direita é controlada por IA.
+  </p>
+
+  <script>
+    // Elementos
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    const startBtn = document.getElementById('startBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const scoreEl = document.getElementById('score');
+
+    // Estado do jogo
+    const state = {
+      running: false,
+      mode: 'single',
+      scoreA: 0,
+      scoreB: 0
+    };
+
+    // Paddles e bola
+    const paddle = {
+      w: 12,
+      h: 80,
+      speed: 6
+    };
+
+    const ball = {
+      x: canvas.width / 2,
+      y: canvas.height / 2,
+      r: 8,
+      speed: 5,
+      vx: 0,
+      vy: 0
+    };
+
+    const left = { x: 10, y: (canvas.height - paddle.h) / 2 };
+    const right = { x: canvas.width - 10 - paddle.w, y: (canvas.height - paddle.h) / 2 };
+
+    // Input
+    const keys = {};
+    canvas.addEventListener('keydown', (e) => { keys[e.key.toLowerCase()] = true; });
+    canvas.addEventListener('keyup', (e) => { keys[e.key.toLowerCase()] = false; });
+    // make canvas focusable
+    canvas.focus();
+
+    // UI handlers
+    document.querySelectorAll('input[name="mode"]').forEach(r => {
+      r.addEventListener('change', (e) => state.mode = e.target.value);
+    });
+
+    startBtn.addEventListener('click', () => {
+      if (!state.running) startGame();
+    });
+
+    resetBtn.addEventListener('click', () => resetGame());
+
+    function resetGame() {
+      state.running = false;
+      state.scoreA = 0;
+      state.scoreB = 0;
+      updateScore();
+      resetPositions();
+      draw();
+    }
+
+    function startGame() {
+      resetPositions();
+      state.running = true;
+      // randomize initial direction
+      const angle = (Math.random() * Math.PI / 4) - (Math.PI / 8); // small angle
+      const dir = Math.random() < 0.5 ? -1 : 1;
+      ball.vx = dir * ball.speed * Math.cos(angle);
+      ball.vy = ball.speed * Math.sin(angle);
+      requestAnimationFrame(loop);
+      canvas.focus();
+    }
+
+    function resetPositions() {
+      left.y = (canvas.height - paddle.h) / 2;
+      right.y = (canvas.height - paddle.h) / 2;
+      ball.x = canvas.width / 2;
+      ball.y = canvas.height / 2;
+      ball.vx = 0;
+      ball.vy = 0;
+    }
+
+    function updateScore() {
+      scoreEl.textContent = `${state.scoreA} : ${state.scoreB}`;
+    }
+
+    function loop() {
+      if (!state.running) return;
+      update();
+      draw();
+      requestAnimationFrame(loop);
+    }
+
+    function update() {
+      // player controls
+      if (keys['w']) left.y -= paddle.speed;
+      if (keys['s']) left.y += paddle.speed;
+      if (state.mode === 'two') {
+        if (keys['arrowup']) right.y -= paddle.speed;
+        if (keys['arrowdown']) right.y += paddle.speed;
+      } else {
+        // simple AI: follow ball with some max speed and deadzone
+        const center = right.y + paddle.h / 2;
+        const diff = ball.y - center;
+        const aiSpeed = 4; // tweak for difficulty
+        if (Math.abs(diff) > 10) right.y += Math.sign(diff) * Math.min(Math.abs(diff), aiSpeed);
+      }
+
+      // clamp paddles
+      left.y = Math.max(0, Math.min(canvas.height - paddle.h, left.y));
+      right.y = Math.max(0, Math.min(canvas.height - paddle.h, right.y));
+
+      // move ball
+      ball.x += ball.vx;
+      ball.y += ball.vy;
+
+      // top/bottom collision
+      if (ball.y - ball.r < 0) {
+        ball.y = ball.r;
+        ball.vy *= -1;
+      }
+      if (ball.y + ball.r > canvas.height) {
+        ball.y = canvas.height - ball.r;
+        ball.vy *= -1;
+      }
+
+      // left paddle collision
+      if (ball.x - ball.r < left.x + paddle.w && ball.x - ball.r > left.x) {
+        if (ball.y > left.y && ball.y < left.y + paddle.h) {
+          ball.x = left.x + paddle.w + ball.r;
+          reflectFromPaddle(left);
+        }
+      }
+
+      // right paddle collision
+      if (ball.x + ball.r > right.x && ball.x + ball.r < right.x + paddle.w) {
+        if (ball.y > right.y && ball.y < right.y + paddle.h) {
+          ball.x = right.x - ball.r;
+          reflectFromPaddle(right);
+        }
+      }
+
+      // left/right go out -> score
+      if (ball.x < 0) {
+        state.scoreB += 1;
+        updateScore();
+        checkResetAfterPoint();
+      }
+      if (ball.x > canvas.width) {
+        state.scoreA += 1;
+        updateScore();
+        checkResetAfterPoint();
+      }
+    }
+
+    function reflectFromPaddle(pad) {
+      // compute relative intersection (-1..1)
+      const relativeY = (ball.y - (pad.y + paddle.h / 2)) / (paddle.h / 2);
+      const maxBounce = Math.PI / 3; // 60 degrees
+      const bounceAngle = relativeY * maxBounce;
+      const speed = Math.min(10, Math.hypot(ball.vx, ball.vy) + 0.5); // increase speed slightly
+      const direction = pad === left ? 1 : -1;
+      ball.vx = direction * speed * Math.cos(bounceAngle);
+      ball.vy = speed * Math.sin(bounceAngle);
+    }
+
+    function checkResetAfterPoint() {
+      state.running = false;
+      resetPositions();
+      // small timeout before auto-restart
+      setTimeout(() => {
+        if (state.mode) startGame();
+      }, 600);
+    }
+
+    function drawNet() {
+      const seg = 10;
+      for (let y = 0; y < canvas.height; y += seg * 2) {
+        ctx.fillRect(canvas.width / 2 - 1, y, 2, seg);
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // background simple
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // net
+      ctx.fillStyle = '#fff';
+      drawNet();
+
+      // paddles
+      ctx.fillRect(left.x, left.y, paddle.w, paddle.h);
+      ctx.fillRect(right.x, right.y, paddle.w, paddle.h);
+
+      // ball
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // initial paint
+    resetGame();
+
+    // make sure canvas regains focus on click so it receives keyboard events
+    canvas.addEventListener('click', () => canvas.focus());
+
+    // allow starting with Enter key
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        if (!state.running) startGame();
+      }
+    });
+  </script>
 </body>
-
 </html>
