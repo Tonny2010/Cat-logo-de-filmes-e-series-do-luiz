@@ -1,21 +1,17 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Ponnala&display=swap');
-
-
-
-
-
+@import url("https://fonts.googleapis.com/css2?family=Ponnala&display=swap");
 }
 
 body {
     color: black;
     background: whitesmoke;
-    margin: 5px
+    margin: 5px;
 }
 
 h1 {
     font-family: "Ponnala"; 
 }
+
     
 header {
     border-bottom: solid 2px darkred;
