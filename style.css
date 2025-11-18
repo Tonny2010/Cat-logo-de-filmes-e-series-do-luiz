@@ -1,0 +1,27 @@
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playwrite+CZ:wght@100..400&display=swap');
+</style>
+
+body {
+    color: darkred;
+    background: darkgreen;
+    margin: 5px;
+}
+
+h1 {
+    font-family: "Playwrite Česko"; 
+}
+
+    
+header {
+    border-bottom: solid 2px darkred;
+    padding: 20px 32px;
+    font-size: 32px;
+}
+
+section {
+    background: whitesmoke;
+    padding-bottom: 80px;
+    padding-top: 50px;
+    display: flex;
+}
